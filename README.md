@@ -61,5 +61,5 @@ protection:
 ```
 ## 📦 Installation
 1. Place the DungeonRefresher.jar into your server's plugins/ folder.
-2.Restart the server (or run /plugman load DungeonRefresher).
+3. Restart the server (or run /plugman load DungeonRefresher).
 3. (Optional) Edit config.yml to your needs and run /dr reload.
