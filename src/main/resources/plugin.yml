@@ -1,0 +1,23 @@
+name: DungeonRefresher
+version: 1.0.0
+main: ru.deelter.dungeonrefresher.DungeonRefresher
+api-version: "1.21"
+author: DeelTer
+description: Automatically refreshes loot in chests, barrels, and vaults after a configurable cooldown.
+
+commands:
+  dungeonrefresher:
+    aliases: [dr, drefresher]
+    description: Main command for DungeonRefresher
+    usage: /<command> reload | debug | reset
+
+permissions:
+  dungeonrefresher.reload:
+    description: Allows reloading the configuration
+    default: op
+  dungeonrefresher.debug:
+    description: Allows checking cooldown of a container
+    default: op
+  dungeonrefresher.reset:
+    description: Allows forcibly resetting container loot
+    default: op

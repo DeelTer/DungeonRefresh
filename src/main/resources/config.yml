@@ -1,0 +1,37 @@
+# DungeonRefresher Configuration
+# Version: 1.0.0
+
+# Refresh timing settings (in minutes)
+refresh:
+  # Minimum cooldown before loot can be regenerated (in minutes)
+  # Default: 1440 minutes = 24 hours
+  min-minutes: 1440
+  # Maximum cooldown before loot can be regenerated (in minutes)
+  # Default: 5760 minutes = 96 hours
+  max-minutes: 5760
+
+# Which container types to process
+features:
+  # Trial Vaults (requires Paper 1.21+)
+  vaults: true
+  # Normal chests and trapped chests
+  chests: true
+  # Barrels
+  barrels: true
+  # Clear inventory before filling with new loot (if false, new loot will be merged with existing items)
+  clear-inventory-on-refresh: true
+
+# Cooldown storage method
+storage:
+  # true = use PersistentDataContainer (stored inside the block, survives server restarts)
+  # false = use in-memory Caffeine cache (resets on restart, faster but volatile)
+  use-persistent-data-container: true
+
+# Protection settings (prevent breaking containers before cooldown expires)
+protection:
+  # Enable protection for loot containers (players cannot break them while on cooldown)
+  enabled: false
+  # Permission to bypass protection
+  bypass-permission: "dungeonrefresher.bypass"
+  # Prevent explosions from destroying containers
+  protect-from-explosions: true
