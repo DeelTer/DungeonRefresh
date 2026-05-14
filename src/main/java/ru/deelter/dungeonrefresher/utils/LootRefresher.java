@@ -6,7 +6,6 @@ import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -14,47 +13,79 @@ import ru.deelter.dungeonrefresher.DungeonRefresher;
 
 public final class LootRefresher {
 
-	public static void forceRefresh(DungeonRefresher plugin, @NonNull Block block) {
-		BlockState state = block.getState();
-		Inventory inventory = null;
+    private static final NamespacedKey CUSTOM_LOOT_KEY = new NamespacedKey("dungeonrefresher", "custom_loot_table");
 
-		if (state instanceof Container container) {
-			inventory = container.getInventory();
-		} else if (state instanceof Vault) {
-			plugin.getLogger().warning("Force refresh for Vault is not supported yet.");
-			return;
-		}
-		if (inventory == null) return;
+    public static void forceRefresh(DungeonRefresher plugin, @NonNull Block block) {
+        BlockState state = block.getState();
+        Inventory inventory = null;
 
-		if (plugin.getConfigManager().isClearInventoryOnRefresh()) {
-			inventory.clear();
-		}
-		LootTable table = getStoredLootTable(plugin, state);
-		if (table == null) return;
+        if (state instanceof Container container) {
+            inventory = container.getInventory();
+        } else if (state instanceof Vault) {
+            plugin.getLogger().warning("Force refresh for Vault is not supported yet.");
+            return;
+        }
+        if (inventory == null) return;
 
-		table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
+        if (plugin.getConfigManager().isClearInventoryOnRefresh()) {
+            inventory.clear();
+        }
+        LootTable table = getEffectiveLootTable(plugin, state);
+        if (table == null) return;
 
-		long min = plugin.getConfigManager().getMinRefreshMillis();
-		long max = plugin.getConfigManager().getMaxRefreshMillis();
-		long refreshDelay = RandomUtil.randomLong(min, max);
-		long newCooldown = System.currentTimeMillis() + refreshDelay;
+        table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
 
-		plugin.getCooldownCache().setCooldown(block, newCooldown);
-	}
+        long min = plugin.getConfigManager().getMinRefreshMillis();
+        long max = plugin.getConfigManager().getMaxRefreshMillis();
+        long refreshDelay = RandomUtil.randomLong(min, max);
+        long newCooldown = System.currentTimeMillis() + refreshDelay;
 
-	@Nullable
-	private static LootTable getStoredLootTable(DungeonRefresher plugin, BlockState state) {
-		if (!(state instanceof TileState tileState)) return null;
+        plugin.getCooldownCache().setCooldown(block, newCooldown);
+    }
 
-		PersistentDataContainer container = tileState.getPersistentDataContainer();
-		NamespacedKey key = new NamespacedKey(plugin, "loot_table");
-		String tableKeyId = container.get(key, PersistentDataType.STRING);
+    @Nullable
+    public static LootTable getEffectiveLootTable(DungeonRefresher plugin, BlockState state) {
+        LootTable custom = getCustomLootTable(state);
+        if (custom != null) return custom;
+        return getStoredLootTable(plugin, state);
+    }
 
-		if (tableKeyId == null) return null;
+    public static void setCustomLootTable(@NonNull Block block, @NonNull String lootTableKey) {
+        if (!(block.getState() instanceof TileState state)) return;
+        var pdc = state.getPersistentDataContainer();
+        pdc.set(CUSTOM_LOOT_KEY, PersistentDataType.STRING, lootTableKey);
+        state.update();
+    }
 
-		var tableKey = NamespacedKey.fromString(tableKeyId);
-		if (tableKey == null) return null;
+    public static void removeCustomLootTable(@NonNull Block block) {
+        if (!(block.getState() instanceof TileState state)) return;
+        var pdc = state.getPersistentDataContainer();
+        pdc.remove(CUSTOM_LOOT_KEY);
+        state.update();
+    }
 
-		return Bukkit.getLootTable(tableKey);
-	}
+    @Nullable
+    private static LootTable getCustomLootTable(BlockState state) {
+        if (!(state instanceof TileState tileState)) return null;
+        var pdc = tileState.getPersistentDataContainer();
+        String tableKeyId = pdc.get(CUSTOM_LOOT_KEY, PersistentDataType.STRING);
+        if (tableKeyId == null) return null;
+        var tableKey = NamespacedKey.fromString(tableKeyId);
+        return tableKey != null ? Bukkit.getLootTable(tableKey) : null;
+    }
+
+    @Nullable
+    private static LootTable getStoredLootTable(DungeonRefresher plugin, BlockState state) {
+        if (!(state instanceof TileState tileState)) return null;
+
+        var pdc = tileState.getPersistentDataContainer();
+        NamespacedKey key = new NamespacedKey(plugin, "loot_table");
+        String tableKeyId = pdc.get(key, PersistentDataType.STRING);
+        if (tableKeyId == null) return null;
+
+        var tableKey = NamespacedKey.fromString(tableKeyId);
+        if (tableKey == null) return null;
+
+        return Bukkit.getLootTable(tableKey);
+    }
 }

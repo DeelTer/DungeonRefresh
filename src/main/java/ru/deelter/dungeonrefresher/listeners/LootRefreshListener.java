@@ -14,11 +14,13 @@ import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
 import ru.deelter.dungeonrefresher.DungeonRefresher;
 import ru.deelter.dungeonrefresher.utils.CooldownCache;
+import ru.deelter.dungeonrefresher.utils.LootRefresher;
 import ru.deelter.dungeonrefresher.utils.RandomUtil;
 
 public class LootRefreshListener implements Listener {
@@ -56,17 +58,12 @@ public class LootRefreshListener implements Listener {
 		long now = System.currentTimeMillis();
 		long refreshDelay = getRandomRefreshDelay();
 
-		// Логирование
-		plugin.getLogger().info("Opening " + block.getType() + " at " + block.getLocation() + " | cooldown=" + cooldown + " now=" + now);
-
 		if (cooldown == 0) {
-			plugin.getLogger().info("No cooldown, setting new one for " + refreshDelay + " ms");
 			cooldownCache.setCooldown(block, now + refreshDelay);
 			return;
 		}
 
 		if (now >= cooldown) {
-			plugin.getLogger().info("Cooldown expired, refreshing loot");
 			regenerateLoot(state, inventory);
 			cooldownCache.setCooldown(block, now + getRandomRefreshDelay());
 		}
@@ -76,7 +73,7 @@ public class LootRefreshListener implements Listener {
 		if (plugin.getConfigManager().isClearInventoryOnRefresh()) {
 			inventory.clear();
 		}
-		LootTable table = getStoredLootTable(state);
+		LootTable table = LootRefresher.getEffectiveLootTable(plugin, state);
 		if (table == null) return;
 		table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
 	}
@@ -84,9 +81,9 @@ public class LootRefreshListener implements Listener {
 	private LootTable getStoredLootTable(BlockState state) {
 		if (!(state instanceof TileState tileState)) return null;
 
-		var pdc = tileState.getPersistentDataContainer();
+		PersistentDataContainer container = tileState.getPersistentDataContainer();
 		NamespacedKey key = new NamespacedKey(plugin, "loot_table");
-		String tableKeyId = pdc.get(key, PersistentDataType.STRING);
+		String tableKeyId = container.get(key, PersistentDataType.STRING);
 		if (tableKeyId == null) return null;
 
 		var tableKey = NamespacedKey.fromString(tableKeyId);

@@ -9,7 +9,7 @@ commands:
   dungeonrefresher:
     aliases: [dr, drefresher]
     description: Main command for DungeonRefresher
-    usage: /<command> reload | debug | reset
+    usage: /<command> reload | debug | reset | setloot <key> | resetloot
 
 permissions:
   dungeonrefresher.reload:
@@ -20,4 +20,10 @@ permissions:
     default: op
   dungeonrefresher.reset:
     description: Allows forcibly resetting container loot
+    default: op
+  dungeonrefresher.setloot:
+    description: Allows setting a custom loot table on a container
+    default: op
+  dungeonrefresher.resetloot:
+    description: Allows removing a custom loot table from a container
     default: op

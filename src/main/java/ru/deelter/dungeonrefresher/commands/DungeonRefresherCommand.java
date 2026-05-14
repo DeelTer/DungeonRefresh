@@ -24,16 +24,16 @@ import java.util.stream.Collectors;
 public class DungeonRefresherCommand implements CommandExecutor, TabCompleter {
 
     private final DungeonRefresher plugin;
-    private static final List<String> SUBCOMMANDS = Arrays.asList("reload", "debug", "reset");
+    private static final List<String> SUBCOMMANDS = Arrays.asList("reload", "debug", "reset", "setloot", "resetloot");
 
     public DungeonRefresherCommand(DungeonRefresher plugin) {
         this.plugin = plugin;
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NonNull [] args) {
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /" + label + " reload | debug | reset"));
+            sender.sendMessage(Component.text("Usage: /" + label + " reload | debug | reset | setloot | resetloot"));
             return true;
         }
 
@@ -89,19 +89,61 @@ public class DungeonRefresherCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage(Component.text("Loot has been forcibly refreshed! New cooldown applied."));
                 break;
 
+            case "setloot":
+                if (!player.hasPermission("dungeonrefresher.setloot")) {
+                    player.sendMessage(Component.text("You don't have permission!"));
+                    return true;
+                }
+                if (args.length < 2) {
+                    player.sendMessage(Component.text("Usage: /" + label + " setloot <loot_table_key>"));
+                    return true;
+                }
+                Block setBlock = player.getTargetBlock(null, 10);
+                if (!isLootable(setBlock)) {
+                    player.sendMessage(Component.text("You are not looking at a valid loot container!"));
+                    return true;
+                }
+                String lootKey = args[1];
+                if (!isValidLootTable(lootKey)) {
+                    player.sendMessage(Component.text("Invalid loot table key! Use tab completion to see available keys."));
+                    return true;
+                }
+                LootRefresher.setCustomLootTable(setBlock, lootKey);
+                player.sendMessage(Component.text("Loot table set to: " + lootKey));
+                break;
+
+            case "resetloot":
+                if (!player.hasPermission("dungeonrefresher.resetloot")) {
+                    player.sendMessage(Component.text("You don't have permission!"));
+                    return true;
+                }
+                Block resetLootBlock = player.getTargetBlock(null, 10);
+                if (!isLootable(resetLootBlock)) {
+                    player.sendMessage(Component.text("You are not looking at a valid loot container!"));
+                    return true;
+                }
+                LootRefresher.removeCustomLootTable(resetLootBlock);
+                player.sendMessage(Component.text("Custom loot table removed. Original will be used on next refresh."));
+                break;
+
             default:
-                sender.sendMessage(Component.text("Unknown subcommand. Use: /" + label + " reload | debug | reset"));
+                sender.sendMessage(Component.text("Unknown subcommand. Use: /" + label + " reload | debug | reset | setloot | resetloot"));
                 break;
         }
         return true;
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NonNull [] args) {
         if (args.length == 1) {
             String partial = args[0].toLowerCase();
             return SUBCOMMANDS.stream()
                     .filter(cmd -> cmd.startsWith(partial))
+                    .collect(Collectors.toList());
+        } else if (args.length == 2 && args[0].equalsIgnoreCase("setloot")) {
+            String partial = args[1].toLowerCase();
+            return plugin.getConfigManager().getAvailableLootTables().stream()
+                    .filter(table -> table.toLowerCase().startsWith(partial))
                     .collect(Collectors.toList());
         }
         return List.of();
@@ -113,5 +155,9 @@ public class DungeonRefresherCommand implements CommandExecutor, TabCompleter {
         if (config.isUseVaults() && type == Material.VAULT) return true;
         if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) return true;
         return config.isUseBarrels() && type == Material.BARREL;
+    }
+
+    private boolean isValidLootTable(String key) {
+        return plugin.getConfigManager().getAvailableLootTables().contains(key);
     }
 }
