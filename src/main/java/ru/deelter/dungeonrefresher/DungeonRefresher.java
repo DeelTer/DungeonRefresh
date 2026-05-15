@@ -38,5 +38,6 @@ public final class DungeonRefresher extends JavaPlugin {
 			command.setExecutor(cmdExecutor);
 			command.setTabCompleter(cmdExecutor);
 		}
+		new MetricsManager(this, 31329);
 	}
 }

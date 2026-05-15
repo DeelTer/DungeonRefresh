@@ -14,10 +14,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
+    compileOnly("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
 
+    implementation("org.bstats:bstats-bukkit:3.2.1")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
@@ -29,6 +30,7 @@ tasks {
     jar { enabled = false }
     shadowJar {
         relocate("com.github.benmanes.caffeine", "${project.group}.shaded.caffeine")
+        relocate("org.bstats", project.group.toString())
     }
     assemble { dependsOn(shadowJar) }
     runServer {

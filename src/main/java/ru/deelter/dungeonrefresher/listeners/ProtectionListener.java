@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import ru.deelter.dungeonrefresher.DungeonRefresher;
 
 public class ProtectionListener implements Listener {
@@ -45,7 +46,7 @@ public class ProtectionListener implements Listener {
 		event.blockList().removeIf(block -> isProtectedContainer(block));
 	}
 
-	private boolean isProtectedContainer(Block block) {
+	private boolean isProtectedContainer(@NonNull Block block) {
 		var config = plugin.getConfigManager();
 		var type = block.getType();
 
