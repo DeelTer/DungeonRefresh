@@ -96,7 +96,6 @@ public class LootRefreshListener implements Listener {
 		Material type = block.getType();
 		var config = plugin.getConfigManager();
 
-		if (config.isUseVaults() && type == Material.VAULT) return true;
 		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) return true;
 		return config.isUseBarrels() && type == Material.BARREL;
 	}
