@@ -14,6 +14,7 @@ import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
+import org.bukkit.loot.Lootable;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
@@ -42,7 +43,7 @@ public class LootRefreshListener implements Listener {
 		if (state instanceof TileState tileState) {
 			String lootKey = event.getLootTable().getKey().toString();
 			var pdc = tileState.getPersistentDataContainer();
-			pdc.set(new NamespacedKey(plugin, "loot_table"), PersistentDataType.STRING, lootKey);
+			pdc.set(LootRefresher.LOOT_TABLE_KEY, PersistentDataType.STRING, lootKey);
 			tileState.update();
 		}
 	}
@@ -101,7 +102,11 @@ public class LootRefreshListener implements Listener {
 			return false;
 		}
 
-		return getStoredLootTable(block.getState()) != null;
+		BlockState state = block.getState();
+		// Chest has vanilla loot table (not yet opened) — dungeon chest
+		if (state instanceof Lootable lootable && lootable.getLootTable() != null) return true;
+		// Chest was opened before — we saved its loot table key in PDC
+		return getStoredLootTable(state) != null;
 	}
 
 	private long getRandomRefreshDelay() {

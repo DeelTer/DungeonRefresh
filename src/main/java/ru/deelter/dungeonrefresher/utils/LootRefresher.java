@@ -14,6 +14,7 @@ import ru.deelter.dungeonrefresher.DungeonRefresher;
 public final class LootRefresher {
 
 	private static final NamespacedKey CUSTOM_LOOT_KEY = new NamespacedKey("dungeonrefresher", "custom_loot_table");
+	public static final NamespacedKey LOOT_TABLE_KEY = new NamespacedKey("dungeonrefresher", "loot_table");
 
 	public static void forceRefresh(DungeonRefresher plugin, @NonNull Block block) {
 		BlockState state = block.getState();
@@ -74,13 +75,18 @@ public final class LootRefresher {
 		return tableKey != null ? Bukkit.getLootTable(tableKey) : null;
 	}
 
+	public static boolean hasStoredLootTable(@NonNull BlockState state) {
+		if (!(state instanceof TileState tileState)) return false;
+		var pdc = tileState.getPersistentDataContainer();
+		return pdc.has(LOOT_TABLE_KEY, PersistentDataType.STRING);
+	}
+
 	@Nullable
 	private static LootTable getStoredLootTable(DungeonRefresher plugin, BlockState state) {
 		if (!(state instanceof TileState tileState)) return null;
 
 		var pdc = tileState.getPersistentDataContainer();
-		NamespacedKey key = new NamespacedKey(plugin, "loot_table");
-		String tableKeyId = pdc.get(key, PersistentDataType.STRING);
+		String tableKeyId = pdc.get(LOOT_TABLE_KEY, PersistentDataType.STRING);
 		if (tableKeyId == null) return null;
 
 		var tableKey = NamespacedKey.fromString(tableKeyId);
