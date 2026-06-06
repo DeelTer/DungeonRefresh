@@ -31,6 +31,7 @@ java {
 tasks {
     jar { enabled = false }
     shadowJar {
+        archiveAppendix.set("")
         relocate("com.github.benmanes.caffeine", "${project.group}.shaded.caffeine")
         relocate("org.bstats", project.group.toString())
     }
