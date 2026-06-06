@@ -1,8 +1,6 @@
 package ru.deelter.dungeonrefresher.listeners;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
@@ -14,8 +12,6 @@ import org.bukkit.event.world.LootGenerateEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootTable;
-import org.bukkit.loot.Lootable;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.NonNull;
@@ -38,14 +34,19 @@ public class LootRefreshListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onLootGenerate(@NonNull LootGenerateEvent event) {
 		if (!(event.getInventoryHolder() instanceof BlockState state)) return;
-		if (!isLootable(state.getBlock())) return;
+		Block block = state.getBlock();
+		if (!isTrackedType(block)) return;
 
-		if (state instanceof TileState tileState) {
-			String lootKey = event.getLootTable().getKey().toString();
-			var pdc = tileState.getPersistentDataContainer();
-			pdc.set(LootRefresher.LOOT_TABLE_KEY, PersistentDataType.STRING, lootKey);
-			tileState.update();
-		}
+		if (!(state instanceof TileState tileState)) return;
+
+		String lootKey = event.getLootTable().getKey().toString();
+		var pdc = tileState.getPersistentDataContainer();
+		pdc.set(LootRefresher.LOOT_TABLE_KEY, PersistentDataType.STRING, lootKey);
+		tileState.update();
+
+		// Set initial cooldown here — LootGenerateEvent only fires for dungeon containers
+		long refreshDelay = getRandomRefreshDelay();
+		cooldownCache.setCooldown(block, System.currentTimeMillis() + refreshDelay);
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -53,19 +54,19 @@ public class LootRefreshListener implements Listener {
 		Inventory inventory = event.getInventory();
 		if (!(inventory.getHolder() instanceof BlockState state)) return;
 		Block block = state.getBlock();
-		if (!isLootable(block)) return;
+		if (!isTrackedType(block)) return;
+
+		// Only act on chests we've already tracked (have PDC key from LootGenerateEvent)
+		BlockState freshState = block.getState();
+		if (!LootRefresher.hasStoredLootTable(freshState)) return;
 
 		long cooldown = cooldownCache.getCooldown(block);
 		long now = System.currentTimeMillis();
-		long refreshDelay = getRandomRefreshDelay();
 
-		if (cooldown == 0) {
-			cooldownCache.setCooldown(block, now + refreshDelay);
-			return;
-		}
+		if (cooldown == 0) return; // Should not happen, but skip safely
 
 		if (now >= cooldown) {
-			regenerateLoot(state, inventory);
+			regenerateLoot(freshState, inventory);
 			cooldownCache.setCooldown(block, now + getRandomRefreshDelay());
 		}
 	}
@@ -79,34 +80,12 @@ public class LootRefreshListener implements Listener {
 		table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
 	}
 
-	private LootTable getStoredLootTable(BlockState state) {
-		if (!(state instanceof TileState tileState)) return null;
-
-		PersistentDataContainer container = tileState.getPersistentDataContainer();
-		NamespacedKey key = new NamespacedKey(plugin, "loot_table");
-		String tableKeyId = container.get(key, PersistentDataType.STRING);
-		if (tableKeyId == null) return null;
-
-		var tableKey = NamespacedKey.fromString(tableKeyId);
-		if (tableKey == null) return null;
-
-		return Bukkit.getLootTable(tableKey);
-	}
-
-	private boolean isLootable(@NonNull Block block) {
+	private boolean isTrackedType(@NonNull Block block) {
 		Material type = block.getType();
 		var config = plugin.getConfigManager();
 
-		if (!(config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) &&
-		    !(config.isUseBarrels() && type == Material.BARREL)) {
-			return false;
-		}
-
-		BlockState state = block.getState();
-		// Chest has vanilla loot table (not yet opened) — dungeon chest
-		if (state instanceof Lootable lootable && lootable.getLootTable() != null) return true;
-		// Chest was opened before — we saved its loot table key in PDC
-		return getStoredLootTable(state) != null;
+		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) return true;
+		return config.isUseBarrels() && type == Material.BARREL;
 	}
 
 	private long getRandomRefreshDelay() {

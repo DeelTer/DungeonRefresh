@@ -35,7 +35,8 @@ public class ProtectionListener implements Listener {
 
 		long cooldown = plugin.getCooldownCache().getCooldown(block);
 		long now = System.currentTimeMillis();
-		if (cooldown > 0 && now < cooldown) {
+
+		if (cooldown == 0 || now < cooldown) {
 			event.setCancelled(true);
 			player.sendMessage(Component.text("This container is protected until its loot refreshes!"));
 		}
@@ -46,7 +47,7 @@ public class ProtectionListener implements Listener {
 		if (!plugin.getConfigManager().isProtectionEnabled()) return;
 		if (!plugin.getConfigManager().isProtectFromExplosions()) return;
 
-		event.blockList().removeIf(block -> isProtectedContainer(block));
+		event.blockList().removeIf(this::isProtectedContainer);
 	}
 
 	private boolean isProtectedContainer(@NonNull Block block) {
@@ -56,7 +57,7 @@ public class ProtectionListener implements Listener {
 		if (config.isUseVaults() && type == Material.VAULT) return true;
 
 		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST) ||
-		    config.isUseBarrels() && type == Material.BARREL) {
+				config.isUseBarrels() && type == Material.BARREL) {
 			return isDungeonContainer(block);
 		}
 		return false;
