@@ -1,5 +1,5 @@
 name: DungeonRefresher
-version: 1.0.0
+version: 1.0.2
 main: ru.deelter.dungeonrefresher.DungeonRefresher
 api-version: "1.21"
 author: DeelTer

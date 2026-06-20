@@ -50,6 +50,7 @@ public class TrialVaultRefresher implements Listener {
 
 		if (!dataContainer.has(key, PersistentDataType.LONG)) {
 			dataContainer.set(key, PersistentDataType.LONG, currentTimestamp);
+			blockEntity.setChanged();
 			return;
 		}
 
@@ -70,9 +71,8 @@ public class TrialVaultRefresher implements Listener {
 			}
 
 			rewardedPlayers.remove(playerId);
-			event.setCancelled(true);
-			event.callEvent();
-			dataContainer.remove(key);
+			dataContainer.set(key, PersistentDataType.LONG, currentTimestamp);
+			blockEntity.setChanged();
 		} catch (NoSuchFieldException | IllegalAccessException ex) {
 			ex.printStackTrace();
 		}
