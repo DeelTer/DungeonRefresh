@@ -18,6 +18,10 @@ features:
   chests: true
   # Barrels
   barrels: true
+  # Dispensers (e.g. in trial chambers)
+  dispensers: true
+  # Droppers
+  droppers: true
   # Clear inventory before filling with new loot (if false, new loot will be merged with existing items)
   clear-inventory-on-refresh: true
 

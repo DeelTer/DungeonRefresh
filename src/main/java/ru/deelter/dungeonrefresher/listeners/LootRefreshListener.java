@@ -85,7 +85,9 @@ public class LootRefreshListener implements Listener {
 		var config = plugin.getConfigManager();
 
 		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) return true;
-		return config.isUseBarrels() && type == Material.BARREL;
+		if (config.isUseBarrels() && type == Material.BARREL) return true;
+		if (config.isUseDispensers() && type == Material.DISPENSER) return true;
+		return config.isUseDroppers() && type == Material.DROPPER;
 	}
 
 	private long getRandomRefreshDelay() {

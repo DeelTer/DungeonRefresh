@@ -18,6 +18,8 @@ public class ConfigManager {
 	private final boolean useVaults;
 	private final boolean useChests;
 	private final boolean useBarrels;
+	private final boolean useDispensers;
+	private final boolean useDroppers;
 	private final boolean clearInventoryOnRefresh;
 	private final boolean usePersistentStorage;
 	private final boolean protectionEnabled;
@@ -35,6 +37,8 @@ public class ConfigManager {
 		this.useVaults = config.getBoolean("features.vaults", true);
 		this.useChests = config.getBoolean("features.chests", true);
 		this.useBarrels = config.getBoolean("features.barrels", true);
+		this.useDispensers = config.getBoolean("features.dispensers", true);
+		this.useDroppers = config.getBoolean("features.droppers", true);
 		this.clearInventoryOnRefresh = config.getBoolean("features.clear-inventory-on-refresh", true);
 		this.usePersistentStorage = config.getBoolean("storage.use-persistent-data-container", true);
 		this.protectionEnabled = config.getBoolean("protection.enabled", false);
