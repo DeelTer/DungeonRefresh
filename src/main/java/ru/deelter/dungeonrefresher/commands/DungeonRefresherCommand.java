@@ -153,7 +153,9 @@ public class DungeonRefresherCommand implements CommandExecutor, TabCompleter {
 		var config = plugin.getConfigManager();
 		var type = block.getType();
 		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) return true;
-		return config.isUseBarrels() && type == Material.BARREL;
+		if (config.isUseBarrels() && type == Material.BARREL) return true;
+		if (config.isUseDispensers() && type == Material.DISPENSER) return true;
+		return config.isUseDroppers() && type == Material.DROPPER;
 	}
 
 	private boolean isValidLootTable(String key) {
