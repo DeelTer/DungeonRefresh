@@ -25,6 +25,9 @@ public class ConfigManager {
 	private final boolean protectionEnabled;
 	private final String protectionBypassPermission;
 	private final boolean protectFromExplosions;
+	private final boolean elderGuardianEnabled;
+	private final long elderGuardianMinMillis;
+	private final long elderGuardianMaxMillis;
 	private final List<String> availableLootTables;
 
 	public ConfigManager(@NonNull DungeonRefresher plugin) {
@@ -44,6 +47,9 @@ public class ConfigManager {
 		this.protectionEnabled = config.getBoolean("protection.enabled", false);
 		this.protectionBypassPermission = config.getString("protection.bypass-permission", "dungeonrefresher.bypass");
 		this.protectFromExplosions = config.getBoolean("protection.protect-from-explosions", true);
+		this.elderGuardianEnabled = config.getBoolean("features.elder-guardian", true);
+		this.elderGuardianMinMillis = config.getLong("features.elder-guardian-min-minutes", 1440) * 60 * 1000;
+		this.elderGuardianMaxMillis = config.getLong("features.elder-guardian-max-minutes", 2880) * 60 * 1000;
 		this.availableLootTables = filterLootTables();
 	}
 

@@ -1,6 +1,7 @@
 package ru.deelter.dungeonrefresher.listeners;
 
 import net.kyori.adventure.text.Component;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;

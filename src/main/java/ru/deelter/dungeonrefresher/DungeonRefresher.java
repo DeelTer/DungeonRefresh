@@ -6,6 +6,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.deelter.dungeonrefresher.commands.DungeonRefresherCommand;
 import ru.deelter.dungeonrefresher.config.ConfigManager;
+import ru.deelter.dungeonrefresher.listeners.ElderGuardianListener;
 import ru.deelter.dungeonrefresher.listeners.LootRefreshListener;
 import ru.deelter.dungeonrefresher.listeners.ProtectionListener;
 import ru.deelter.dungeonrefresher.utils.CooldownCache;
@@ -31,6 +32,9 @@ public final class DungeonRefresher extends JavaPlugin {
 
 		if (configManager.isProtectionEnabled()) {
 			getServer().getPluginManager().registerEvents(new ProtectionListener(this), this);
+		}
+		if (configManager.isElderGuardianEnabled()) {
+			getServer().getPluginManager().registerEvents(new ElderGuardianListener(this), this);
 		}
 		PluginCommand command = getCommand("dungeonrefresher");
 		if (command != null) {

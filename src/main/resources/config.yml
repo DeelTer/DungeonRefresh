@@ -24,6 +24,10 @@ features:
   droppers: true
   # Clear inventory before filling with new loot (if false, new loot will be merged with existing items)
   clear-inventory-on-refresh: true
+  # Respawn Elder Guardians after cooldown (stored in chunk PDC, survives restarts)
+  elder-guardian: true
+  elder-guardian-min-minutes: 300
+  elder-guardian-max-minutes: 1800
 
 # Cooldown storage method
 storage:
