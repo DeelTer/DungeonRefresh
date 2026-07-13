@@ -1,7 +1,7 @@
 package ru.deelter.dungeonrefresher.listeners;
 
+import com.destroystokyo.paper.MaterialSetTag;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -57,7 +57,7 @@ public class ProtectionListener implements Listener {
 
 		if (config.isUseVaults() && type == Material.VAULT) return true;
 
-		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST) ||
+		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST || MaterialSetTag.COPPER_CHESTS.isTagged(type)) ||
 				config.isUseBarrels() && type == Material.BARREL) {
 			return isDungeonContainer(block);
 		}

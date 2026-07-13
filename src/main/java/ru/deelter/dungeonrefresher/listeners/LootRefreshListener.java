@@ -1,5 +1,7 @@
 package ru.deelter.dungeonrefresher.listeners;
 
+import com.destroystokyo.paper.MaterialSetTag;
+import com.destroystokyo.paper.MaterialTags;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -19,6 +21,8 @@ import ru.deelter.dungeonrefresher.DungeonRefresher;
 import ru.deelter.dungeonrefresher.utils.CooldownCache;
 import ru.deelter.dungeonrefresher.utils.LootRefresher;
 import ru.deelter.dungeonrefresher.utils.RandomUtil;
+
+import java.util.Set;
 
 public class LootRefreshListener implements Listener {
 
@@ -82,18 +86,19 @@ public class LootRefreshListener implements Listener {
 		} catch (IllegalArgumentException e) {
 			var loc = state.getLocation();
 			plugin.getLogger().warning(String.format(
-				"Failed to refresh loot for container at %s [%d, %d, %d] (loot table '%s'): %s",
-				loc.getWorld() != null ? loc.getWorld().getName() : "?",
-				loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
-				table.getKey(), e.getMessage()));
+					"Failed to refresh loot for container at %s [%d, %d, %d] (loot table '%s'): %s",
+					loc.getWorld() != null ? loc.getWorld().getName() : "?",
+					loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
+					table.getKey(), e.getMessage()));
 		}
 	}
+
 
 	private boolean isTrackedType(@NonNull Block block) {
 		Material type = block.getType();
 		var config = plugin.getConfigManager();
 
-		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST)) return true;
+		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST || MaterialSetTag.COPPER_CHESTS.isTagged(type))) return true;
 		if (config.isUseBarrels() && type == Material.BARREL) return true;
 		if (config.isUseDispensers() && type == Material.DISPENSER) return true;
 		return config.isUseDroppers() && type == Material.DROPPER;
