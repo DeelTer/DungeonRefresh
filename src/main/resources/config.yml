@@ -29,6 +29,16 @@ features:
   elder-guardian-min-minutes: 300
   elder-guardian-max-minutes: 1800
 
+# Loot behavior on /dr reset (force refresh)
+reset:
+  # If true, /dr reset replaces the container's loot table with the one below
+  # instead of refilling from the original. The replacement is persisted, so
+  # future automatic refreshes also use it. Useful when the original loot table
+  # requires combat/block context that a chest cannot provide (fill fails).
+  replace-loot-table: false
+  # Loot table used when replace-loot-table is true
+  replacement-loot-table: "minecraft:chests/simple_dungeon"
+
 # Cooldown storage method
 storage:
   # true = use PersistentDataContainer (stored inside the block, survives server restarts)

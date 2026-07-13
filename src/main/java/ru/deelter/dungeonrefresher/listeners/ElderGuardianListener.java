@@ -17,6 +17,7 @@ import ru.deelter.dungeonrefresher.utils.RandomUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ElderGuardianListener implements Listener {
 
@@ -43,12 +44,13 @@ public class ElderGuardianListener implements Listener {
 		storeGuardian(loc.getChunk(), loc, respawnAt);
 	}
 
+	private static final Set<Biome> OCEAN_BIOMES = Set.of(
+			Biome.OCEAN, Biome.COLD_OCEAN, Biome.DEEP_COLD_OCEAN, Biome.DEEP_FROZEN_OCEAN, Biome.DEEP_LUKEWARM_OCEAN,
+			Biome.WARM_OCEAN, Biome.FROZEN_OCEAN, Biome.LUKEWARM_OCEAN, Biome.DEEP_OCEAN
+	);
+
 	private boolean isOcean(@NotNull Biome biome) {
-		return switch (biome) {
-			case OCEAN, COLD_OCEAN, DEEP_COLD_OCEAN, DEEP_FROZEN_OCEAN, DEEP_LUKEWARM_OCEAN, WARM_OCEAN, FROZEN_OCEAN,
-			     LUKEWARM_OCEAN, DEEP_OCEAN -> true;
-			default -> false;
-		};
+		return OCEAN_BIOMES.contains(biome);
 	}
 
 	@EventHandler

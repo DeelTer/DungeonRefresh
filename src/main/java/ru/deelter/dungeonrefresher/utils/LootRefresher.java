@@ -31,7 +31,18 @@ public final class LootRefresher {
 		if (plugin.getConfigManager().isClearInventoryOnRefresh()) {
 			inventory.clear();
 		}
-		LootTable table = getEffectiveLootTable(plugin, state);
+
+		LootTable table;
+		if (plugin.getConfigManager().isResetReplaceLootTable()) {
+			var replacementKey = NamespacedKey.fromString(plugin.getConfigManager().getResetReplacementLootTable());
+			table = replacementKey != null ? Bukkit.getLootTable(replacementKey) : null;
+			if (table != null) {
+				// persist so future auto-refreshes use it too
+				setCustomLootTable(block, table.getKey().toString());
+			}
+		} else {
+			table = getEffectiveLootTable(plugin, state);
+		}
 		if (table == null) return;
 
 		table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());

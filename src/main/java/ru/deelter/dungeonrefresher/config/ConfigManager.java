@@ -28,6 +28,8 @@ public class ConfigManager {
 	private final boolean elderGuardianEnabled;
 	private final long elderGuardianMinMillis;
 	private final long elderGuardianMaxMillis;
+	private final boolean resetReplaceLootTable;
+	private final String resetReplacementLootTable;
 	private final List<String> availableLootTables;
 
 	public ConfigManager(@NonNull DungeonRefresher plugin) {
@@ -50,6 +52,8 @@ public class ConfigManager {
 		this.elderGuardianEnabled = config.getBoolean("features.elder-guardian", true);
 		this.elderGuardianMinMillis = config.getLong("features.elder-guardian-min-minutes", 1440) * 60 * 1000;
 		this.elderGuardianMaxMillis = config.getLong("features.elder-guardian-max-minutes", 2880) * 60 * 1000;
+		this.resetReplaceLootTable = config.getBoolean("reset.replace-loot-table", false);
+		this.resetReplacementLootTable = config.getString("reset.replacement-loot-table", "minecraft:chests/simple_dungeon");
 		this.availableLootTables = filterLootTables();
 	}
 
