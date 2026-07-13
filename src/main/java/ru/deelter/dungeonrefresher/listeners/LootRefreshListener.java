@@ -77,7 +77,16 @@ public class LootRefreshListener implements Listener {
 		}
 		LootTable table = LootRefresher.getEffectiveLootTable(plugin, state);
 		if (table == null) return;
-		table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
+		try {
+			table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
+		} catch (IllegalArgumentException e) {
+			var loc = state.getLocation();
+			plugin.getLogger().warning(String.format(
+				"Failed to refresh loot for container at %s [%d, %d, %d] (loot table '%s'): %s",
+				loc.getWorld() != null ? loc.getWorld().getName() : "?",
+				loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
+				table.getKey(), e.getMessage()));
+		}
 	}
 
 	private boolean isTrackedType(@NonNull Block block) {

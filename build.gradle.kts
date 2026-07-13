@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "ru.deelter"
-version = "1.0.2"
+version = "1.1.0"
 description = "DungeonLootRefresher"
 
 repositories {
@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("26.2.build.+")
     compileOnly("org.projectlombok:lombok:1.18.38")
     annotationProcessor("org.projectlombok:lombok:1.18.38")
 
@@ -37,7 +37,7 @@ tasks {
     }
     assemble { dependsOn(shadowJar) }
     runServer {
-        minecraftVersion("26.1.2")
+        minecraftVersion("26.2")
         jvmArgs("-Xms2G", "-Xmx2G", "-Dcom.mojang.eula.agree=true")
     }
     processResources {
