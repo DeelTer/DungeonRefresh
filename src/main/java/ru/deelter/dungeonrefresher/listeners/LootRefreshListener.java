@@ -1,7 +1,5 @@
 package ru.deelter.dungeonrefresher.listeners;
 
-import com.destroystokyo.paper.MaterialSetTag;
-import com.destroystokyo.paper.MaterialTags;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -20,9 +18,8 @@ import org.jspecify.annotations.NonNull;
 import ru.deelter.dungeonrefresher.DungeonRefresher;
 import ru.deelter.dungeonrefresher.utils.CooldownCache;
 import ru.deelter.dungeonrefresher.utils.LootRefresher;
+import ru.deelter.dungeonrefresher.utils.NmsLootFiller;
 import ru.deelter.dungeonrefresher.utils.RandomUtil;
-
-import java.util.Set;
 
 public class LootRefreshListener implements Listener {
 
@@ -81,27 +78,33 @@ public class LootRefreshListener implements Listener {
 		}
 		LootTable table = LootRefresher.getEffectiveLootTable(plugin, state);
 		if (table == null) return;
+		var loc = state.getLocation();
 		try {
-			table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
+			table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(loc).build());
 		} catch (IllegalArgumentException e) {
-			var loc = state.getLocation();
-			plugin.getLogger().warning(String.format(
-					"Failed to refresh loot for container at %s [%d, %d, %d] (loot table '%s'): %s",
-					loc.getWorld() != null ? loc.getWorld().getName() : "?",
-					loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
-					table.getKey(), e.getMessage()));
+			// Bukkit bridge fails for datapack generic-type loot tables on Paper 26.2;
+			// fall back to NMS path that builds a proper CHEST LootParams
+			try {
+				if (!NmsLootFiller.fill(table, inventory, loc)) {
+					plugin.getLogger().warning(String.format(
+							"Failed to refresh loot for container at %s [%d, %d, %d] (loot table '%s'): NMS fill returned false",
+							loc.getWorld() != null ? loc.getWorld().getName() : "?",
+							loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
+							table.getKey()));
+				}
+			} catch (Exception e2) {
+				plugin.getLogger().warning(String.format(
+						"Failed to refresh loot for container at %s [%d, %d, %d] (loot table '%s'): %s",
+						loc.getWorld() != null ? loc.getWorld().getName() : "?",
+						loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
+						table.getKey(), e2.getMessage()));
+			}
 		}
 	}
 
 
 	private boolean isTrackedType(@NonNull Block block) {
-		Material type = block.getType();
-		var config = plugin.getConfigManager();
-
-		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST || MaterialSetTag.COPPER_CHESTS.isTagged(type))) return true;
-		if (config.isUseBarrels() && type == Material.BARREL) return true;
-		if (config.isUseDispensers() && type == Material.DISPENSER) return true;
-		return config.isUseDroppers() && type == Material.DROPPER;
+		return plugin.getConfigManager().isTrackedContainer(block);
 	}
 
 	private long getRandomRefreshDelay() {

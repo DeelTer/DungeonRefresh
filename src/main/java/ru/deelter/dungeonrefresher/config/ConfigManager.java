@@ -1,6 +1,9 @@
 package ru.deelter.dungeonrefresher.config;
 
+import com.destroystokyo.paper.MaterialSetTag;
 import lombok.Getter;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jspecify.annotations.NonNull;
 import ru.deelter.dungeonrefresher.DungeonRefresher;
@@ -55,6 +58,15 @@ public class ConfigManager {
 		this.resetReplaceLootTable = config.getBoolean("reset.replace-loot-table", false);
 		this.resetReplacementLootTable = config.getString("reset.replacement-loot-table", "minecraft:chests/simple_dungeon");
 		this.availableLootTables = filterLootTables();
+	}
+
+	public boolean isTrackedContainer(@NonNull Block block) {
+		Material type = block.getType();
+		if (useChests && (type == Material.CHEST || type == Material.TRAPPED_CHEST || MaterialSetTag.COPPER_CHESTS.isTagged(type))) return true;
+		if (useBarrels && type == Material.BARREL) return true;
+		if (useVaults && type == Material.VAULT) return true;
+		if (useDispensers && type == Material.DISPENSER) return true;
+		return useDroppers && type == Material.DROPPER;
 	}
 
 	private @NonNull List<String> filterLootTables() {

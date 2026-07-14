@@ -1,6 +1,7 @@
 package ru.deelter.dungeonrefresher.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
@@ -45,7 +46,12 @@ public final class LootRefresher {
 		}
 		if (table == null) return;
 
-		table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(state.getLocation()).build());
+		Location loc = state.getLocation();
+		try {
+			table.fillInventory(inventory, RandomUtil.RANDOM, new LootContext.Builder(loc).build());
+		} catch (IllegalArgumentException e) {
+			NmsLootFiller.fill(table, inventory, loc);
+		}
 
 		long min = plugin.getConfigManager().getMinRefreshMillis();
 		long max = plugin.getConfigManager().getMaxRefreshMillis();

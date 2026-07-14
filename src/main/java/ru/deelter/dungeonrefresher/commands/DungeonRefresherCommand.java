@@ -1,6 +1,5 @@
 package ru.deelter.dungeonrefresher.commands;
 
-import com.destroystokyo.paper.MaterialSetTag;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -151,12 +150,7 @@ public class DungeonRefresherCommand implements CommandExecutor, TabCompleter {
 	}
 
 	private boolean isLootable(@NonNull Block block) {
-		var config = plugin.getConfigManager();
-		var type = block.getType();
-		if (config.isUseChests() && (type == Material.CHEST || type == Material.TRAPPED_CHEST || MaterialSetTag.COPPER_CHESTS.isTagged(type))) return true;
-		if (config.isUseBarrels() && type == Material.BARREL) return true;
-		if (config.isUseDispensers() && type == Material.DISPENSER) return true;
-		return config.isUseDroppers() && type == Material.DROPPER;
+		return plugin.getConfigManager().isTrackedContainer(block);
 	}
 
 	private boolean isValidLootTable(String key) {
