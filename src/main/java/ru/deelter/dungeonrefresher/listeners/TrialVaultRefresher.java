@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -26,8 +27,9 @@ public class TrialVaultRefresher implements Listener {
 
 	private static final long REFRESH_MILLIS = TimeUnit.HOURS.toMillis(24);
 
-	@EventHandler
+	@EventHandler(ignoreCancelled = true)
 	public void onVaultInteract(@NotNull PlayerInteractEvent event) {
+		if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 		if (!DungeonRefresher.getInstance().getConfigManager().isUseVaults()) return;
 
 		Block block = event.getClickedBlock();
